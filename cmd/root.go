@@ -18,9 +18,12 @@ package cmd
 import (
 	"fmt"
 	"github.com/DuKanghub/coordtrans/pkg"
+	"github.com/DuKanghub/coordtrans/utils/save"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
+	"time"
 )
 
 var (
@@ -30,6 +33,7 @@ var (
 	ak      string
 	from    int
 	to      int
+	data    []string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -62,21 +66,39 @@ coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] 经度,�
 		fromTo := [2]int{from, to}
 		switch fromTo {
 		case [2]int{1, 5}:
-			fmt.Println(transer.WGS84toBD09(args))
+			data = transer.WGS84toBD09(args)
 		case [2]int{5, 1}:
-			fmt.Println(transer.BD09toWGS84(args))
+			data = transer.BD09toWGS84(args)
 		case [2]int{1, 3}:
-			fmt.Println(transer.WGS84toGCJ02(args))
+			data = transer.WGS84toGCJ02(args)
 		case [2]int{3, 1}:
-			fmt.Println(transer.GCJ02toWGS84(args))
+			data = transer.GCJ02toWGS84(args)
 		case [2]int{5, 3}:
-			fmt.Println(transer.BD09toGCJ02(args))
+			data = transer.BD09toGCJ02(args)
 		case [2]int{3, 5}:
-			fmt.Println(transer.GCJ02toBD09(args))
+			data = transer.GCJ02toBD09(args)
 		default:
 			fmt.Println("暂不支持该坐标转换")
 		}
-
+		fmt.Println(data)
+		fileName := time.Now().Format("20060102-010101") + ".xlsx"
+		if outPut != "" {
+			// 如果目录不存在，则创建目录
+			if _, err := os.Stat(outPut); os.IsNotExist(err) {
+				err := os.MkdirAll(outPut, os.ModePerm)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+			}
+			fileName = filepath.Join(outPut, fileName)
+		}
+		err := save.Save2Excel(fileName, data)
+		if err != nil {
+			fmt.Println("保存失败", err)
+		} else {
+			fmt.Println("保存成功")
+		}
 		//fmt.Println(transer.WGS84toBD09(116.404, 39.915))
 	},
 }
@@ -103,7 +125,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&ak, "ak", "k", "", "私钥，非必须，默认为空，如果使用百度接口，则必传")
 	rootCmd.PersistentFlags().IntVarP(&from, "from", "f", 1, "源坐标系，即传入的坐标系类型。非必须，默认为1，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().IntVarP(&to, "to", "t", 5, "目标坐标系，即需要转换成的坐标系类型。非必须，默认为5，可选值：1, 3, 5")
-	rootCmd.PersistentFlags().StringVarP(&outPut, "output", "o", "", "将结果保存到指定目录下，非必须，默认为空")
 }
 
 // initConfig reads in config file and ENV variables if set.

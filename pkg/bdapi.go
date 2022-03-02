@@ -15,9 +15,11 @@ type BdApi struct {
 }
 
 // 发起百度API请求
-func apiRequest(coords string, from, to int, ak string) []string {
+func apiRequest(coords []string, from, to int, ak string) []string {
 	var results []string
-	url := fmt.Sprintf(bdApiUrl, coords, from, to, ak)
+	coordsMerged := strings.Join(coords, ";")
+	url := fmt.Sprintf(bdApiUrl, coordsMerged, from, to, ak)
+	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return results
@@ -27,6 +29,7 @@ func apiRequest(coords string, from, to int, ak string) []string {
 	if err != nil {
 		return results
 	}
+	fmt.Println(string(body))
 	var result struct {
 		Status int
 		Result []struct {
@@ -41,38 +44,32 @@ func apiRequest(coords string, from, to int, ak string) []string {
 	if result.Status != 0 {
 		return results
 	}
-	for _, r := range result.Result {
-		results = append(results, fmt.Sprintf("%f,%f", r.X, r.Y))
+	for i, r := range result.Result {
+		results = append(results, fmt.Sprintf("%s,%f,%f", coords[i], r.X, r.Y))
 	}
 	return results
 }
 
 func (b *BdApi) WGS84toBD09(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 1, 5, b.ak)
+	return apiRequest(coords, 1, 5, b.ak)
 }
 
 func (b *BdApi) BD09toWGS84(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 5, 1, b.ak)
+	return apiRequest(coords, 5, 1, b.ak)
 }
 
 func (b *BdApi) GCJ02toBD09(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 3, 5, b.ak)
+	return apiRequest(coords, 3, 5, b.ak)
 }
 
 func (b *BdApi) BD09toGCJ02(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 5, 3, b.ak)
+	return apiRequest(coords, 5, 3, b.ak)
 }
 
 func (b *BdApi) WGS84toGCJ02(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 1, 3, b.ak)
+	return apiRequest(coords, 1, 3, b.ak)
 }
 
 func (b *BdApi) GCJ02toWGS84(coords []string) []string {
-	str := strings.Join(coords, ";")
-	return apiRequest(str, 3, 1, b.ak)
+	return apiRequest(coords, 3, 1, b.ak)
 }
