@@ -25,13 +25,11 @@ import (
 
 var (
 	cfgFile string
-	method	string
-	outPut string
-	ak		string
-	lon 	float64
-	lat 	float64
-	from int
-	to	int
+	method  string
+	outPut  string
+	ak      string
+	from    int
+	to      int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -43,30 +41,38 @@ var rootCmd = &cobra.Command{
 - GPS坐标与百度系坐标互转：WGS84与BD09(bd09ii)
 - GPS坐标与火星系坐标互转：WGS84与GCJ02，即高德坐标或腾讯坐标
 - 百度坐标与火星系坐标互转：BD09(bd09ii)与GCJ02
+使用方法：
+coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] 经度,纬度
+多个坐标用空格分隔，如：经度,纬度 经度,纬度
+注意：百度api暂不支持目标坐标系为GPS坐标。
 `,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			fmt.Println("请输入转换的坐标系")
+			os.Exit(1)
+		}
 		a := pkg.Account{
 			Method: method,
-			AK: ak,
+			AK:     ak,
 		}
 		transer := pkg.NewTransFormer(a)
 		//fmt.Println(coordTransform.WGS84toBD09(116.404, 39.915))
 		fromTo := [2]int{from, to}
 		switch fromTo {
-		case [2]int{1,5}:
-			fmt.Println(transer.WGS84toBD09(lon,lat))
-		case [2]int{5,1}:
-			fmt.Println(transer.BD09toWGS84(lon,lat))
-		case [2]int{1,3}:
-			fmt.Println(transer.WGS84toGCJ02(lon,lat))
-		case [2]int{3,1}:
-			fmt.Println(transer.GCJ02toWGS84(lon,lat))
-		case [2]int{5,3}:
-			fmt.Println(transer.BD09toGCJ02(lon,lat))
-		case [2]int{3,5}:
-			fmt.Println(transer.GCJ02toBD09(lon,lat))
+		case [2]int{1, 5}:
+			fmt.Println(transer.WGS84toBD09(args))
+		case [2]int{5, 1}:
+			fmt.Println(transer.BD09toWGS84(args))
+		case [2]int{1, 3}:
+			fmt.Println(transer.WGS84toGCJ02(args))
+		case [2]int{3, 1}:
+			fmt.Println(transer.GCJ02toWGS84(args))
+		case [2]int{5, 3}:
+			fmt.Println(transer.BD09toGCJ02(args))
+		case [2]int{3, 5}:
+			fmt.Println(transer.GCJ02toBD09(args))
 		default:
 			fmt.Println("暂不支持该坐标转换")
 		}
@@ -95,8 +101,6 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "T", false, "Help message for toggle")
 	rootCmd.PersistentFlags().StringVarP(&method, "method", "m", "mod", "接口模式，非必须，默认为mod，可选值：mod、bd")
 	rootCmd.PersistentFlags().StringVarP(&ak, "ak", "k", "", "私钥，非必须，默认为空，如果使用百度接口，则必传")
-	rootCmd.PersistentFlags().Float64VarP(&lon, "lon", "x", 0, "经度，必须")
-	rootCmd.PersistentFlags().Float64VarP(&lat, "lat", "y", 0, "纬度，必须")
 	rootCmd.PersistentFlags().IntVarP(&from, "from", "f", 1, "源坐标系，即传入的坐标系类型。非必须，默认为1，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().IntVarP(&to, "to", "t", 5, "目标坐标系，即需要转换成的坐标系类型。非必须，默认为5，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().StringVarP(&outPut, "output", "o", "", "将结果保存到指定目录下，非必须，默认为空")
