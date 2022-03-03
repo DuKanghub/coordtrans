@@ -34,6 +34,7 @@ var (
 	from    int
 	to      int
 	data    []string
+	file    string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -46,13 +47,20 @@ var rootCmd = &cobra.Command{
 - GPS坐标与火星系坐标互转：WGS84与GCJ02，即高德坐标或腾讯坐标
 - 百度坐标与火星系坐标互转：BD09(bd09ii)与GCJ02
 使用方法：
-coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] 经度,纬度
-多个坐标用空格分隔，如：经度,纬度 经度,纬度
+coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] [-F <表格文件>] 经度,纬度
+- 多个坐标用空格分隔，如：经度,纬度 经度,纬度
+- 支持从表格中读取坐标，第一行为表头，一共两列，第1列为经度，第2列为纬度。
 注意：百度api暂不支持目标坐标系为GPS坐标。
 `,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
+		if file != "" {
+			arr, err := save.ReadExcel(file)
+			if err == nil && len(arr) > 0 {
+				args = append(args, arr...)
+			}
+		}
 		if len(args) == 0 {
 			fmt.Println("请输入转换的坐标系")
 			os.Exit(1)
@@ -125,6 +133,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&ak, "ak", "k", "", "私钥，非必须，默认为空，如果使用百度接口，则必传")
 	rootCmd.PersistentFlags().IntVarP(&from, "from", "f", 1, "源坐标系，即传入的坐标系类型。非必须，默认为1，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().IntVarP(&to, "to", "t", 5, "目标坐标系，即需要转换成的坐标系类型。非必须，默认为5，可选值：1, 3, 5")
+	rootCmd.PersistentFlags().StringVarP(&file, "file", "F", "", "从表格文件读入坐标")
 }
 
 // initConfig reads in config file and ENV variables if set.

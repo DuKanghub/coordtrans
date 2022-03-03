@@ -8,6 +8,7 @@ import (
 
 func Save2Excel(fileName string, data []string) error {
 	xlsx := excelize.NewFile()
+	// 设置表头，即列标题
 	xlsx.SetCellValue("Sheet1", "A1", "序号")
 	xlsx.SetCellValue("Sheet1", "B1", "原经度")
 	xlsx.SetCellValue("Sheet1", "C1", "原纬度")
@@ -24,4 +25,25 @@ func Save2Excel(fileName string, data []string) error {
 		}
 	}
 	return xlsx.SaveAs(fileName)
+}
+
+func ReadExcel(fileName string) ([]string, error) {
+	xlsx, err := excelize.OpenFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := xlsx.GetRows("Sheet1")
+	if err != nil {
+		return nil, err
+	}
+	var data []string
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		if len(row) == 2 {
+			data = append(data, row[0]+","+row[1])
+		}
+	}
+	return data, nil
 }
