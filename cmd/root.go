@@ -88,8 +88,13 @@ coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] [-F <表�
 		default:
 			fmt.Println("暂不支持该坐标转换")
 		}
-		fmt.Println(data)
-		fileName := time.Now().Format("20060102-010101") + ".xlsx"
+		//fmt.Println(data)
+		// 如果没有数据，就不保存了
+		if len(data) == 0 {
+			fmt.Println("没有数据需要保存")
+			return
+		}
+		fileName := time.Now().Format("20060102-150405") + ".xlsx"
 		if outPut != "" {
 			// 如果目录不存在，则创建目录
 			if _, err := os.Stat(outPut); os.IsNotExist(err) {

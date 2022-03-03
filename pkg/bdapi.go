@@ -50,26 +50,38 @@ func apiRequest(coords []string, from, to int, ak string) []string {
 	return results
 }
 
+func request(coords []string, from, to int, ak string) []string {
+	var results []string
+	for i := 0; i < len(coords); i += 100 {
+		end := i + 100
+		if end > len(coords) {
+			end = len(coords)
+		}
+		results = append(results, apiRequest(coords[i:end], from, to, ak)...)
+	}
+	return results
+}
+
 func (b *BdApi) WGS84toBD09(coords []string) []string {
-	return apiRequest(coords, 1, 5, b.ak)
+	return request(coords, 1, 5, b.ak)
 }
 
 func (b *BdApi) BD09toWGS84(coords []string) []string {
-	return apiRequest(coords, 5, 1, b.ak)
+	return request(coords, 5, 1, b.ak)
 }
 
 func (b *BdApi) GCJ02toBD09(coords []string) []string {
-	return apiRequest(coords, 3, 5, b.ak)
+	return request(coords, 3, 5, b.ak)
 }
 
 func (b *BdApi) BD09toGCJ02(coords []string) []string {
-	return apiRequest(coords, 5, 3, b.ak)
+	return request(coords, 5, 3, b.ak)
 }
 
 func (b *BdApi) WGS84toGCJ02(coords []string) []string {
-	return apiRequest(coords, 1, 3, b.ak)
+	return request(coords, 1, 3, b.ak)
 }
 
 func (b *BdApi) GCJ02toWGS84(coords []string) []string {
-	return apiRequest(coords, 3, 1, b.ak)
+	return request(coords, 3, 1, b.ak)
 }
