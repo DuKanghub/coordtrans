@@ -97,20 +97,27 @@ coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] [-F <表�
 		fileName := time.Now().Format("20060102-150405") + ".xlsx"
 		if outPut != "" {
 			// 如果目录不存在，则创建目录
-			if _, err := os.Stat(outPut); os.IsNotExist(err) {
-				err := os.MkdirAll(outPut, os.ModePerm)
+			outDir := filepath.Dir(outPut)
+			if _, err := os.Stat(outDir); os.IsNotExist(err) {
+				err := os.MkdirAll(outDir, os.ModePerm)
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)
 				}
 			}
-			fileName = filepath.Join(outPut, fileName)
+			// 判断保存路径是否是为表格文件
+			fileExt := filepath.Ext(outPut)
+			if fileExt != ".xlsx" && fileExt != ".xls" {
+				fileName = filepath.Join(outDir, fileName)
+			} else {
+				fileName = outPut
+			}
 		}
 		err := save.Save2Excel(fileName, data)
 		if err != nil {
 			fmt.Println("保存失败", err)
 		} else {
-			fmt.Println("保存成功")
+			fmt.Println("保存成功", fileName)
 		}
 		//fmt.Println(transer.WGS84toBD09(116.404, 39.915))
 	},
@@ -138,7 +145,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&ak, "ak", "k", "", "私钥，非必须，默认为空，如果使用百度接口，则必传")
 	rootCmd.PersistentFlags().IntVarP(&from, "from", "f", 1, "源坐标系，即传入的坐标系类型。非必须，默认为1，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().IntVarP(&to, "to", "t", 5, "目标坐标系，即需要转换成的坐标系类型。非必须，默认为5，可选值：1, 3, 5")
-	rootCmd.PersistentFlags().StringVarP(&outPut, "output", "o", "", "将结果保存到指定目录下，非必须，默认为空")
+	rootCmd.PersistentFlags().StringVarP(&outPut, "output", "o", "", "结果保存路径, 非必须，默认为空")
 	rootCmd.PersistentFlags().StringVarP(&file, "file", "F", "", "从表格文件读入坐标")
 }
 
