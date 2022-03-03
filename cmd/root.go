@@ -138,6 +138,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&ak, "ak", "k", "", "私钥，非必须，默认为空，如果使用百度接口，则必传")
 	rootCmd.PersistentFlags().IntVarP(&from, "from", "f", 1, "源坐标系，即传入的坐标系类型。非必须，默认为1，可选值：1, 3, 5")
 	rootCmd.PersistentFlags().IntVarP(&to, "to", "t", 5, "目标坐标系，即需要转换成的坐标系类型。非必须，默认为5，可选值：1, 3, 5")
+	rootCmd.PersistentFlags().StringVarP(&outPut, "output", "o", "", "将结果保存到指定目录下，非必须，默认为空")
 	rootCmd.PersistentFlags().StringVarP(&file, "file", "F", "", "从表格文件读入坐标")
 }
 
