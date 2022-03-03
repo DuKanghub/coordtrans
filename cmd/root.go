@@ -112,13 +112,17 @@ coordtrans [-m <method>] [-f <from>] [-t <to>] [-o <outPut>] [-a <ak>] [-F <表�
 			} else {
 				fileName = outPut
 			}
-		}
-		err := save.Save2Excel(fileName, data)
-		if err != nil {
-			fmt.Println("保存失败", err)
+			err := save.Save2Excel(fileName, data)
+			if err != nil {
+				fmt.Println("保存失败", err)
+			} else {
+				fmt.Println("保存成功", fileName)
+			}
 		} else {
-			fmt.Println("保存成功", fileName)
+			// 没有-o参数时，输出data到屏幕
+			fmt.Println(data)
 		}
+
 		//fmt.Println(transer.WGS84toBD09(116.404, 39.915))
 	},
 }
